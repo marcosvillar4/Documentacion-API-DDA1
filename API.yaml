@@ -1,0 +1,915 @@
+openapi: 3.0.0
+info:
+  title: API Desarollo de Aplicaciones
+  version: 1.0.0
+  description: API Proyecto subastas Desarollo de aplicaciones
+  contact:
+    name: Support
+    email: sup@rest.rodeo
+servers:
+  - url: https://api.bidvault
+    description: Live
+tags:
+  - name: Auth
+    description: Endpoints Relacionados con autenticacion de usuario
+  - name: Auctions
+    description: Endpoints Relacionados con las Subastas
+  - name: Users
+    description: Endpoints Relacionados con el usuario
+  - name: Publicaciones
+    description: Endpoints Para Publicaciones
+
+paths:
+  
+  
+  ## PATHS AUTH ##
+  /auth/login:
+    post:
+      description: Endpoint para autenticacion de usuarios registrados
+      operationId: loginEndpoint
+      tags: [Auth]
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+           description: 'Autenticacion correcta: Token para login'
+           content:
+             application/json:
+               schema:
+                  $ref: '#/components/schemas/AuthLogin'
+                   
+        '401':
+           description: 'Autenticacion incorrecta: Datos ingresados incorrectos'
+        '500': 
+           description: 'Error interno de server'
+  /auth/register:
+    post:
+      description: Endpoint para autenticacion de usuarios registrados
+      operationId: registerEndpoint
+      tags: [Auth]
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPost'
+      responses:
+        '201':
+          description: Usuario Registrado Correctamente
+          content:
+             application/json:
+               schema:
+                  $ref: '#/components/schemas/AuthLogin'
+        '409': 
+          description: Correo Electronico Ya esta registrado
+        '500': 
+          description: 'Error interno de server'
+  ## PATHS AUTH END ##        
+  
+  ## PATHS SUBASTA ##
+  /auctions:        
+    get:
+      parameters:
+          - in: query
+            name: search
+            required: false
+            description: Termino de busqueda
+            schema:
+              type: string
+      description: Endpoint para buscar lista de todas las subastas
+      operationId: getAllAuctionsEndpoint
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '500':
+          description: Error interno de servidor
+  /auctions/upcoming:        
+    get:
+      parameters:
+          - in: query
+            name: search
+            required: false
+            description: Termino de busqueda
+            schema:
+              type: string
+      description: Endpoint para buscar lista de todas las subastas programadas
+      operationId: getAllUpcomingAuctionsEndpoint
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas programadas'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '500':
+          description: Error interno de servidor
+  /auctions/live:        
+    get:
+      parameters:
+          - in: query
+            name: search
+            required: false
+            description: Termino de busqueda
+            schema:
+              type: string
+      description: Endpoint para buscar lista de todas las subastas en vivo
+      operationId: getAllLiveAuctionsEndpoint
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas en vivo'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '500':
+          description: Error interno de servidor
+  /auctions/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de subasta
+        schema:
+          type: string
+    get:
+      description: Endpoint para buscar info de Subasta 
+      operationId: getAuction
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda exitosa de Subasta por ID'
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/AuctionQuery'
+
+        '500':
+          description: 'Error Interno de Servidor'     
+  /auctions/{id}/img:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de la Subasta
+        schema:
+          type: string
+    get:
+      description: Endpoint para buscar imagenes de Subasta 
+      operationId: getAuctionImages
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda exitosa de fotos de subasta por ID'
+          content:
+            application/json: 
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+
+        '500':
+          description: 'Error Interno de Servidor'
+  /auctions/{id}/bids:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de la Subasta
+        schema:
+          type: string
+    get:
+      description: Endpoint para buscar pujas de Subasta 
+      operationId: getAuctionBids
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Busqueda exitosa de pujas de subasta por ID'
+          content:
+            application/json: 
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bids'
+
+        '500':
+          description: 'Error Interno de Servidor'
+  /auctions/{id}/join:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de subasta
+        schema:
+          type: string
+    post:
+      description: Endpoint para unirse a una Subasta 
+      operationId: joinAuction
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Unido a subasta con exito'
+        '500':
+          description: 'Error Interno de Servidor'  
+        '401': 
+          description: 'Usuario no autorizado'
+  /auctions/{id}/postBid:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de subasta
+        schema:
+          type: string
+    
+    post:
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BidRequest'
+      description: Endpoint para pujar en una subasta
+      operationId: postBid
+      tags: [Auctions]
+      responses:
+        '200':
+          description: 'Puja Hecha con exito'
+        '500':
+          description: 'Error Interno de Servidor'  
+        '401': 
+          description: 'Usuario no autenticado'
+              
+          
+  ## PATHS SUBASTA END ##
+  
+  ## PATHS USER ## 
+  
+  /users/me:
+    get:
+      description: Endpoint para informacion de usuario ingresado
+      operationId: getUserProfile
+      tags: [Users]
+      responses:
+        '200':
+          description: 'GET de Perfil de usuario exitoso'
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/User'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'
+    put:
+      description: Endpoint para actualizar usuario
+      operationId: updateUserProfile
+      tags: [Users]
+      requestBody:
+        required: false
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: 'Actualizacion de perfil exitosa'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'      
+  /users/favourites:
+    get:
+      description: Endpoint para lista de favoritos de usuario
+      operationId: getUserFavourites
+      tags: [Users]
+      responses:
+        '200':
+          description: 'GET de Favoritos'
+          content:
+            application/json: 
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuctionQuery'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'
+  /users/favourites/{id}:
+    parameters:
+        - in: path
+          name: id
+          required: true
+          description: El ID de subasta
+          schema:
+            type: string
+    put:
+      description: Endpoint para agregar favorito
+      operationId: setAuctionAsFavourite
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Subasta Agregada como favorito'
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/AuctionQuery'
+        '401':
+          description: 'Usuario No autenticado'
+        '403':
+          description: 'Subasta ya es favorita'
+        '500': 
+          description: 'Error Interno de Servidor'
+    delete:
+      description: Endpoint para sacar favorito de la lista
+      operationId: removeAuctionAsFavourite
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Subasta Borrada de favoritos'
+        '401':
+          description: 'Usuario No autenticado'
+        '403':
+          description: 'Subasta no es favorita'
+        '500': 
+          description: 'Error Interno de Servidor'
+  /users/me/notifications:
+    get:
+      description: Endpoint para notificaciones de usuario
+      operationId: getUserNotifs
+      tags: [Users]
+      parameters:
+        - in: query
+          name: urgent
+          required: true
+          description: Termino de busqueda
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 'GET de Notificaciones'
+          content:
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Notif'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'          
+  /users/me/won-auctions:
+    get:
+      description: Endpoint para subastas ganadas
+      operationId: getUserWonAuctions
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas ganadas por usuario'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '401':
+          description: 'Usuario No autenticado'
+        '500':
+          description: Error interno de servidor
+  /users/me/participations:
+    get:
+      description: Endpoint para subastas ganadas
+      operationId: getUserAuctions
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas participadas por usuario'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '401':
+          description: 'Usuario No autenticado'
+        '500':
+          description: Error interno de servidor
+  /users/me/payment-methods:
+     get:
+      description: Endpoint para get metodos de pago
+      operationId: getUserPaymentMethods
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET metodos de pago de usuario'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  oneOf: 
+                    - $ref: '#/components/schemas/medioPagoTarjeta'
+                    - $ref: '#/components/schemas/medioPagoCheque'
+        '401':
+          description: 'Usuario No autenticado'
+        '500':
+          description: Error interno de servidor
+     put: 
+       description: Endpoint para agregar metodos de pago
+       operationId: addUserPaymentMethods
+       tags: [Users]
+       requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/medioPagoTarjeta'
+                - $ref: '#/components/schemas/medioPagoCheque'
+       responses:
+         '200':
+          description: 'Metodo de pago agregado correctamente'
+         '401':
+           description: 'Usuario No autenticado'
+         '500':
+           description: Error interno de servidor
+  /users/me/address:
+     get:
+      description: Endpoint para GET lista de direcciones
+      operationId: getUserAddress
+      tags: [Users]
+      responses:
+        '200':
+          description: 'GET de direcciones'
+          content:
+            application/json: 
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'
+     put:
+       description: Endpoint para agregar direccion
+       operationId: addUserAddress
+       tags: [Users]
+       requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref:  '#/components/schemas/Address'
+       responses:
+         '200':
+          description: 'Metodo de pago agregado correctamente'
+         '401':
+           description: 'Usuario No autenticado'
+         '500':
+           description: Error interno de servidor
+  /users/me/deliveries:
+    get:
+      description: Endpoint para entregas de usuario
+      operationId: getUserDeliveries
+      tags: [Users]
+      responses:
+        '200':
+          description: 'GET de Entregas'
+          content:
+            application/json: 
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryItem'
+        '401':
+          description: 'Usuario No autenticado'
+        '500': 
+          description: 'Error Interno de Servidor'
+          
+   ## END PATHS USER ##
+   
+   ## PATHS PUBLICACIONES ##
+   
+  /publicaciones: 
+    
+    get:
+      tags: [Publicaciones]
+      parameters:
+          - in: query
+            name: search
+            required: false
+            description: Termino de busqueda
+            schema:
+              type: string
+      description: Endpoint para buscar lista de todas las subastas publicadas
+      operationId: getAllPublishedItemsEndpoint
+      
+      responses:
+        '200':
+          description: 'Busqueda correcta: GET lista de todas las subastas publicadas del usuario'
+          content: 
+            application/json: 
+              schema:
+                type: array
+                items:  
+                  $ref: '#/components/schemas/AuctionQuery'
+        '500':
+          description: Error interno de servidor
+          
+    post:
+      tags: [Publicaciones]
+      description: Endpoint para publicar item
+      operationId: publishPost
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/itemPublishPost'
+      responses:
+        '201':
+          description: Item publicado con exito
+        '500': 
+          description: 'Error interno de server'
+  
+  
+components:
+  schemas:
+  
+  
+  ## SCHEMAS DE USER LOGIN
+  
+    AuthLogin:
+      type: object
+      description: Schema Auth Login
+      properties:
+        token:
+          type: string
+          description: Token de Auth
+    AuthLoginRequest:
+      type: object
+      description: Schema Auth Login
+      properties:
+        email:
+          type: string
+          description: Email de Usuario
+        passwd:
+          type: string
+          description: Contraseña de usuario
+    RegisterPost:
+          type: object
+          description: Schema Auth Login
+          required:
+            - name 
+            - surname
+            - email 
+            - passwd
+            - domicilio
+            - dniFrente
+            - dniDorso
+          properties:
+            name:
+              type: string
+              description: Nombre de Usuario
+            surname:
+              type: string
+              description: Apellido de usuario
+            email:
+              type: string
+              description: Email de usuario
+            passwd:
+              type: string
+              description: Contraseña de usuario
+            domicilio:
+              type: string
+              description: Domicilio de usuario
+            dniFrente:
+              type: string
+              format: binary
+              description: Frente DNI 
+            dniDorso:
+              type: string
+              format: binary
+              description: Dorso DNI 
+              
+  ##
+  
+  ## SCHEMAS DE SUBASTAS 
+    
+          
+    Image:
+      type: object
+      description: Foto de producto
+      properties:
+        id: 
+          type: string
+          description: ID de foto
+        ProductId:
+          type: integer
+          description: ID de producto
+        img:
+          type: string
+          description: Binario de imagen
+          format: binary
+    
+    CatalogItem:
+      type: object
+      description: Schema de item de catalogo
+      properties:
+        id:
+          type: integer
+          description: ID de item de catalogo
+        catalogId:
+          type: integer
+          description: ID de catalogo
+        Product:
+          type: object
+          description: Producto de un catalogo
+          properties:
+            id: 
+              description: ID de producto
+              type: integer
+            fecha: 
+              description: Fecha de publicacion
+              type: string
+              format: date 
+            descripcionCatalogo:
+              description: Descripcion breve para catalogo
+              type: string
+            descripcionCompleta:
+              description: Descripcion Completa para pagina del producto
+              type: string
+            revisor:
+              description: Revisor del producto
+              type: string
+            dueño: 
+              description: dueño del producto
+              type: string
+            seguro: 
+              description: Seguro del producto
+              type: string
+        precioBase:
+          type: integer
+          description: Precio base del catalogo
+          
+    AuctionQuery:
+      type: object
+      description: Schema de Subasta especifica
+      properties:
+        Catalog:
+          type: object
+          description: Schema de catalogo
+          properties:
+            id:
+              description: ID de catalogo
+              type: integer
+            descripcion:
+              description: Descripcion del catalogo
+              type: string
+            Responsable:
+              type: object
+              description: Schema Responsable
+              properties:
+                id:
+                  type: integer
+                  description: ID de Responsable
+                cargo:
+                  type: string
+                  description: Cargo del Responsable
+                sector:
+                  type: integer
+                  description: ID del Sector
+            Auction:
+              type: object
+              description: Schema Subastas
+              properties:
+                id:
+                  type: integer
+                  description: ID de Subasta
+                estado:
+                  type: boolean
+                  description: Estado de la Subasta (Abierta/Cerrada)
+                fechaYHora:
+                  type: string
+                  format: date-time 
+                  description: Fecha y hora de la subasta
+                subastadorId:
+                  type: integer
+                  description: ID de subastador
+                ubicacion:
+                  type: string
+                  description: Ubicacion de subasta
+                capacidadAsistentes:
+                  type: integer
+                  description: Cantidad de participantes de la subasta
+                tieneDeposito:
+                  type: boolean
+                  description: ¿Tiene Deposito?
+                seguridadPropia:
+                  type: boolean
+                  description: ¿Tiene Seguridad Propia?
+                categoria:
+                  type: string
+                  description: Categoria de la subasta
+                
+          
+        itemsCatalog:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItem'
+            
+    Bids:
+      type: object
+      description: Schema de Pujas
+      properties:
+        id: 
+          type: integer
+          description: ID de la puja
+        itemId:
+          type: integer
+          description: ID del itemCatalogo
+        importe: 
+          type: number 
+          description: Monto de la puja
+        ganador:
+          type: boolean
+          description: ¿Puja Ganadora?
+          
+    BidRequest: 
+      type: object
+      description: Schema para pujar
+      properties:
+        idItem:
+          type: integer
+          description: ID del item del catalogo
+        monto:
+          type: number
+          description: Monto a pujar
+        
+        
+  ##
+  
+  ## SCHEMAS DE USER ##
+    
+    User:
+      type: object
+      description: Schema de user 
+      properties:
+        id:
+          type: integer
+          description: ID de usuario
+        name:
+          type: string
+          description: Nombre de usuario
+        surname:
+          type: string
+          description: Apellido de usuario
+        email:
+          type: string
+          description: Email de usuario
+        joinDate:
+          type: string
+          description: Fecha de registro
+          format: date-time
+        img:
+          type: string
+          description: Fecha de registro
+          format: binary
+        category:
+          type: string
+          description: Categoria de Usuario
+        stats:
+          type: object
+          description: Estadisticas de usuario
+          properties:
+            wonAuctions:
+              type: integer
+              description: Subastas ganadas
+            totalAuctions:
+              type: integer
+              description: Subastas participadas
+            bidTotal:
+              type: number
+              description: Total Ofertado
+            paidTotal:
+              type: number
+              description: Total Pagado 
+ 
+    medioPagoTarjeta:
+      type: object
+      description: Medio de pago
+      properties:
+        nombre:
+          type: string
+          description: Nombre Completo de Tarjeta
+        numero:
+          type: integer
+          description: Numero de tarjeta
+        fecha:
+          type: string
+          description: Fecha vencimiento
+          format: date
+        cvv:
+          type: integer
+          description: Codigo de validacion de tarjeta
+     
+    medioPagoCheque:
+      type: object
+      description: Medio de pago
+      properties:
+        nombre:
+          type: string
+          description: Nombre Titular
+        numero:
+          type: integer
+          description: Numero de Cuenta
+        fecha:
+          type: integer
+          description: CUIT 
+        monto:
+          type: number
+          description: Monto del cheque
+            
+    Notif:
+      type: object
+      description: Schema de notificaciones
+      properties:
+        id: 
+          type: integer
+          description: ID de notificacion
+        urgent:
+          type: boolean
+          description: Booleano de importancia de notificacion (True -> Importante)
+        
+    Address:
+      type: object
+      description: Direccion de Usuario
+      properties:
+        id:
+          type: integer
+          description: ID de Direccion
+        name:
+          type: string
+          description: Nombre de la direccion
+        province:
+          type: string
+          description: Provincia de la direccion
+        localidad:
+          type: string
+          description: Localidad de la direccion
+        address:
+          type: string
+          description: Direccion
+          
+    DeliveryItem:
+      type: object
+      description: Schema para deliveries
+      properties:
+        id:
+          type: integer
+          description: ID de Entrega
+        date:
+          type: string
+          description: Fecha de entrega
+          format: date
+        
+  ## SCHEMAS DE USER END ##
+        
+  ## SCHEMAS DE PUBLICACIONES ##
+  
+    itemPublishPost:
+      type: object
+      description: Item de publicacion
+      properties:
+        title:
+          type: string
+          description: Titulo de la publicacion
+        description:
+          type: string
+          description: Descripcion de la publicacion
+        basePrice:
+          type: number
+          description: Precio base de la publicacion
+        duration:
+          type: integer
+          description: Duracion de la publicacion
+        img:
+          type: array
+          items: 
+            $ref:  '#/components/schemas/Image'
