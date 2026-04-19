@@ -303,6 +303,8 @@ paths:
           description: 'Actualizacion de perfil exitosa'
         '401':
           description: 'Usuario No autenticado'
+        '400':
+          description: 'Datos de usuario incorrectos'
         '500': 
           description: 'Error Interno de Servidor'      
   /users/favourites:
@@ -336,7 +338,7 @@ paths:
       operationId: setAuctionAsFavourite
       tags: [Users]
       responses:
-        '200':
+        '201':
           description: 'Subasta Agregada como favorito'
           content:
             application/json: 
@@ -446,7 +448,7 @@ paths:
           description: 'Usuario No autenticado'
         '500':
           description: Error interno de servidor
-     put: 
+     post: 
        description: Endpoint para agregar metodos de pago
        operationId: addUserPaymentMethods
        tags: [Users]
@@ -469,7 +471,30 @@ paths:
            description: Error interno de servidor
          '409':
            description: 'Metodo de pago ya existe'
-          
+  
+  /users/me/payment-methods/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID del método de pago
+        schema:
+          type: string
+    delete:
+      description: Endpoint para eliminar método de pago
+      operationId: deleteUserPaymentMethod
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Método de pago eliminado correctamente'
+        '401':
+          description: 'Usuario No autenticado'
+        '404':
+          description: 'Método de pago no existe'
+        '500':
+          description: 'Error interno de servidor'
+  
+  
   /users/me/address:
      get:
       description: Endpoint para GET lista de direcciones
@@ -509,6 +534,49 @@ paths:
            description: 'Direccion ya existe'
          '500':
            description: Error interno de servidor
+  
+  /users/me/address/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: El ID de la dirección
+        schema:
+          type: string
+    delete:
+      description: Endpoint para eliminar dirección
+      operationId: deleteUserAddress
+      tags: [Users]
+      responses:
+        '200':
+          description: 'Dirección eliminada correctamente'
+        '401':
+          description: 'Usuario No autenticado'
+        '404':
+          description: 'Dirección no existe'
+        '500':
+          description: 'Error interno de servidor'
+    put:
+      description: Endpoint para actualizar dirección
+      operationId: updateUserAddress
+      tags: [Users]
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+      responses:
+        '200':
+          description: 'Dirección actualizada correctamente'
+        '401':
+          description: 'Usuario No autenticado'
+        '400':
+          description: 'Datos de dirección incorrectos'
+        '404':
+          description: 'Dirección no existe'
+        '500':
+          description: 'Error interno de servidor'
   /users/me/deliveries:
     get:
       description: Endpoint para entregas de usuario
