@@ -387,7 +387,9 @@ paths:
         '401':
           description: 'Usuario No autenticado'
         '500': 
-          description: 'Error Interno de Servidor'          
+          description: 'Error Interno de Servidor'
+        '400':
+          description: 'Parametro de busqueda incorrecto'          
   /users/me/won-auctions:
     get:
       description: Endpoint para subastas ganadas
@@ -457,7 +459,7 @@ paths:
                 - $ref: '#/components/schemas/medioPagoTarjeta'
                 - $ref: '#/components/schemas/medioPagoCheque'
        responses:
-         '200':
+         '201':
           description: 'Metodo de pago agregado correctamente'
          '401':
            description: 'Usuario No autenticado'
@@ -465,6 +467,8 @@ paths:
             description: 'Datos de metodo de pago incorrectos'
          '500':
            description: Error interno de servidor
+         '409':
+           description: 'Metodo de pago ya existe'
           
   /users/me/address:
      get:
@@ -495,10 +499,14 @@ paths:
             schema:
               $ref:  '#/components/schemas/Address'
        responses:
-         '200':
+         '201':
           description: 'Metodo de pago agregado correctamente'
          '401':
            description: 'Usuario No autenticado'
+         '400':
+           description: 'Datos de direccion incorrectos'	
+         '409':
+           description: 'Direccion ya existe'
          '500':
            description: Error interno de servidor
   /users/me/deliveries:
