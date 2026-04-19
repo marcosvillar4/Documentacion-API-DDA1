@@ -466,7 +466,7 @@ paths:
           description: 'Usuario No autenticado'
         '500': 
           description: 'Error Interno de Servidor'
-     put:
+     post:
        description: Endpoint para agregar direccion
        operationId: addUserAddress
        tags: [Users]
@@ -501,7 +501,23 @@ paths:
           description: 'Usuario No autenticado'
         '500': 
           description: 'Error Interno de Servidor'
-          
+    post:
+       description: Endpoint para hacer una request de Delivery
+       operationId: addUserAddress
+       tags: [Users]
+       requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref:  '#/components/schemas/DeliveryRequest'
+       responses:
+         '200':
+          description: 'Peticion de entrega realizada con exito'
+         '401':
+           description: 'Usuario No autenticado'
+         '500':
+           description: Error interno de servidor      
    ## END PATHS USER ##
    
    ## PATHS PUBLICACIONES ##
@@ -856,7 +872,16 @@ components:
         urgent:
           type: boolean
           description: Booleano de importancia de notificacion (True -> Importante)
+        title: 
+          type: string
+          description: Titulo de la notificacion
+        desc: 
+          type: string
+          description: Descripcion de la notificacion
         
+
+
+
     Address:
       type: object
       description: Direccion de Usuario
@@ -888,7 +913,27 @@ components:
           type: string
           description: Fecha de entrega
           format: date
+        tracking:
+          type: integer
+          description: Numero de Rastreo de envio
+        item: 
+          $ref: '#/components/schemas/CatalogItem'
+
+    DeliveryRequest:
+      type: object
+      description: Schema de Request de Delivery
+      properties:
+        item:
+          $ref: '#/components/schemas/CatalogItem'
+        date:
+          type: string
+          description: Fecha de delivery
+          format: date
+        address:
+          $ref: '#/components/schemas/Address'
         
+        
+
   ## SCHEMAS DE USER END ##
         
   ## SCHEMAS DE PUBLICACIONES ##
